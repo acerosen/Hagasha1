@@ -14,34 +14,34 @@ namespace DAL
     public class DAL_IMP : Idal
     {
         XElement TesterRoot;
-        string TesterPath = @"TesterXML.xml";
+        string TesterPath = @"TesterXml.xml";
 
         XElement TraineeRoot;
-        string TraineePath = @"TraineeXML.xml";
+        string TraineePath = @"TraineeXml.xml";
 
         XElement TestRoot;
-        const string TestPath = @"TestXML.XML"; 
-    
+        const string TestPath = @"Test.XML"; //orderPath
+
         public DAL_IMP()
         {
             try
             {
                 if (!File.Exists(TesterPath))
                 {
-                    TesterRoot = new XElement("Tests");
+                    TesterRoot = new XElement("Testers");
                     TesterRoot.Save(TesterPath);
                 }
                 else TesterRoot = XElement.Load(TesterPath);
-                if (!File.Exists(TraineePath))
+                if (!File.Exists(TraineePath))//branch
                 {
                     TraineeRoot = new XElement("Trainees");
-                    TraineeRoot.Save(TraineePath
+                    TraineeRoot.Save(TraineePath);
                 }
                 else TraineeRoot = XElement.Load(TraineePath);
 
                 if (!File.Exists(TestPath))
                 {
-                    TestRoot = new XElement("Tests");
+                    TestRoot = new XElement("Test");
                     TestRoot.Save(TestPath);
                 }
                 else TestRoot = XElement.Load(TestPath);
@@ -51,100 +51,90 @@ namespace DAL
                 throw new Exception("File upload problem");
             }
         }
-        
-        
-        
-        
 
-        #region order
-        public bool findOrder(Order dd)
+        #region Test
+        public bool FindTest(Test T)
         {
             XElement orderElement;
-            orderElement = (from p in orderRoot.Elements()
-                            where Convert.ToInt32(p.Element("orderNumber").Value) == dd.orderNumber
+            orderElement = (from p in TestRoot.Elements()
+                            where Convert.ToInt32(p.Element("TestID").Value) == T.ID
                             select p).FirstOrDefault();
             if (orderElement == null)
                 return false;
             return true;
         }
-        public void addOrder(Order o)
+        public void AddTest(Test T)
         {
-            XElement orderNumber = new XElement("orderNumber", o.orderNumber);
-            XElement branchNumber = new XElement("branchNumber", o.branchNumber);
-            XElement orderDate = new XElement("orderDate", o.orderDate);
-            XElement hechsher = new XElement("hechsher", o.hechsher);
-            XElement countDeliver = new XElement("countDeliver", o.countDeliver);
-            XElement clientName = new XElement("clientName", o.clientName);
-            XElement clientCity = new XElement("clientCity", o.clientCity);
-            XElement clientAddress = new XElement("clientAddress", o.clientAddress);
-            XElement cardNumber = new XElement("cardNumber", o.cardNumber);
-            XElement clientPhoneNomber = new XElement("clientPhoneNomber", o.clientPhoneNomber);
-
-            orderRoot.Add(new XElement("Order", orderNumber, branchNumber, orderDate, hechsher, countDeliver, clientName, clientCity, cardNumber, clientAddress, clientPhoneNomber));
-            orderRoot.Save(orderPath);
+            XElement TestID = new XElement("TestID", T.ID);
+            XElement TesterID = new XElement("TesterID", T.TesterID);
+            XElement TraineeID = new XElement("TraineeID", T.TraineeID);
+            XElement Date = new XElement("Date", T.Date);
+            XElement Hour = new XElement("Hour", T.Hour);
+            XElement Address = new XElement("Address", T.Address);
+            XElement Grade = new XElement("Grade", T.Grade);
+            XElement Comment = new XElement("Comment", T.Comment);
+            TesterRoot.Add(new XElement("Test", TestID, TesterID, TraineeID, Date, Hour, Address, Grade, Comment));
+            TestRoot.Save(TestPath);
 
         }
-        public void deleteOrder(Order o)
+        public void DeleteTest(Test T)
         {
             try
             {
-                IEnumerable<XElement> orderDishElements;
-                XElement orderElement;
-                orderElement = (from p in orderRoot.Elements()
-                                where p.Element("orderNumber").Value == o.orderNumber.ToString()
+                IEnumerable<XElement> TestElements;
+                XElement TestElement;
+                TestElement = (from p in TestRoot.Elements()
+                                where p.Element("TestID").Value == T.ID.ToString()
                                 select p).FirstOrDefault();
-                orderDishElements = from p in orderDishRoot.Elements()
-                                    where Convert.ToInt32(p.Element("orderNumber").Value) == o.orderNumber
+               TestElements = from p in TestRoot.Elements()
+                                    where Convert.ToInt32(p.Element("TestID").Value) == T.ID
                                     select p;
-                foreach (var item in orderDishElements)
+                foreach (var item in TestElements)
                     item.Remove();
-                orderDishRoot.Save(orderDishPath);
-                orderElement.Remove();
-                orderRoot.Save(orderPath);
+                TestRoot.Save(TestPath);
+                TestElement.Remove();
+                TestRoot.Save(TestPath);
             }
             catch
             {
                 throw new Exception("The order dos'nt exsist in the system");
             }
         }
-        public void updateOrder(Order o)
+        public void UpdateTest(Test T)
         {
-            orderRoot = XElement.Load(orderPath);
-            XElement order = (from item in orderRoot.Elements()
-                              where item.Element("orderNumber").Value == o.orderNumber.ToString()
+            TestRoot = XElement.Load(TestPath);
+            XElement Test = (from item in TestRoot.Elements()
+                              where item.Element("TestID").Value == T.ID.ToString()
                               select item).FirstOrDefault();
-            order.Element("branchNumber").Value = o.branchNumber.ToString();
-            order.Element("hechsher").Value = o.hechsher.ToString();
-            order.Element("orderDate").Value = o.orderDate.ToString();
-            order.Element("countDeliver").Value = o.countDeliver.ToString();
-            order.Element("clientName").Value = o.clientName.ToString();
-            order.Element("clientCity").Value = o.clientCity.ToString();
-            order.Element("clientAddress").Value = o.clientAddress.ToString();
-            order.Element("cardNumber").Value = o.cardNumber.ToString();
-            order.Element("clientPhoneNomber").Value = o.clientPhoneNomber.ToString();
-            orderRoot.Save(orderPath);
+            Test.Element("TestID").Value = T.ID.ToString();
+            Test.Element("TesterID").Value = T.TesterID.ToString();
+            Test.Element("TraineeID").Value = T.TraineeID.ToString();
+            Test.Element("Date").Value = T.Date.ToString();
+            Test.Element("Hour").Value = T.Hour.ToString();
+            Test.Element("Address").Value = T.Address.ToString();
+            Test.Element("Grade").Value = T.Grade.ToString();
+            Test.Element("Comment").Value = T.Comment.ToString();
+            TestRoot.Save(TestPath);
         }
 
-        public List<Order> getListOrderes()
+        public List<Test> GetListTests()
         {
-            orderRoot = XElement.Load(orderPath);
-            List<Order> orders = new List<Order>();
+            TestRoot = XElement.Load(TestPath);
+            List<Test> orders = new List<Test>();
             try
             {
-                orders = (from item in orderRoot.Elements()
-                          select new Order()
-                          {
-                              orderNumber = Convert.ToInt32(item.Element("orderNumber").Value),
-                              orderDate = Convert.ToDateTime(item.Element("dateOrder").Value),
-                              branchNumber = Convert.ToInt32(item.Element("branchNumber").Value),
-                              hechsher = (kosherLevel)Enum.Parse(typeof(kosherLevel), item.Element("hechsher").Value),
-                              countDeliver = Convert.ToInt32(item.Element("countDeliver").Value),
-                              clientName = item.Element("clientName").Value,
-                              clientCity = item.Element("clientCity").Value,
-                              clientAddress = item.Element("clientAddress").Value,
-                              cardNumber = Convert.ToInt32(item.Element("cardNumber").Value),
-                              clientPhoneNomber = Convert.ToInt64(item.Element("clientPhoneNomber").Value),
-                          }).ToList();
+                List<Test> Test = (from item in TestRoot.Elements()
+                                   select new Test()
+                                   {
+                                       ID = Convert.ToInt32(item.Element("TestID").Value),
+                                       TesterID = Convert.ToInt32(item.Element("Tester").Value),
+                                       TraineeID = Convert.ToInt32(item.Element("TraineeID").Value),
+                                       Date = item.Element("Date").Value,
+                                       Hour = Convert.ToInt32(item.Element("Hour").Value),
+                                       Address = item.Element("Address").Value,
+                                       Grade = Convert.ToBoolean("Grade"),
+                                       Comment = item.Element("Comment").Value,
+                                   }).ToList();
             }
             catch
             {
@@ -154,115 +144,129 @@ namespace DAL
             return orders;
         }
 
-        public IEnumerable<Order> getAllOrder(Func<Order, bool> predicat = null)
+        public IEnumerable<Test> GetAllTests(Func<Test, bool> predicat = null)
         {
-            IEnumerable<Order> order;
+            IEnumerable<Test> Test;
             try
             {
 
-                order = (from item in orderRoot.Elements()
-                         select new Order()
+                Test = (from item in TestRoot.Elements()
+                         select new Test()
                          {
-                             orderNumber = Convert.ToInt32(item.Element("orderNumber").Value),
-                             orderDate = Convert.ToDateTime(item.Element("orderDate").Value),
-                             branchNumber = Convert.ToInt32(item.Element("branchNumber").Value),
-                             hechsher = (kosherLevel)Enum.Parse(typeof(kosherLevel), item.Element("hechsher").Value),
-                             countDeliver = Convert.ToInt32(item.Element("countDeliver").Value),
-                             clientName = item.Element("clientName").Value,
-                             clientCity = item.Element("clientCity").Value,
-                             clientAddress = item.Element("clientAddress").Value,
-                             cardNumber = Convert.ToInt32(item.Element("cardNumber").Value),
-                             clientPhoneNomber = Convert.ToInt64(item.Element("clientPhoneNomber").Value),
+                             ID = Convert.ToInt32(item.Element("TestID").Value),
+                             TesterID = Convert.ToInt32(item.Element("TesterID").Value),
+                             TraineeID = Convert.ToInt32(item.Element("TraineeID").Value),
+                             Date = item.Element("Date").Value,
+                             Hour = Convert.ToInt32(item.Element("Hour").Value),
+                             Address = item.Element("Address").Value,
+                             Grade = Convert.ToBoolean("Grade"),
+                             Comment = item.Element("Comment").Value,
                          }).ToList();
                 if (predicat != null)
                 {
-                    order = order.Where(predicat);
+                    Test = Test.Where(predicat);
 
                 }
             }
             catch
             {
-                order = null;
+                Test = null;
             }
-            return order;
+            return Test;
         }
         #endregion
 
-        #region dish
+        #region Tester
 
-        public bool findDish(int id)//מחזיר "אמת" כאשר כאשר המנה נמצאה בקובץ
+        public bool FindTester(int id)
         {
-            XElement dishElement;
-            dishElement = (from p in dishRoot.Elements()
-                           where Convert.ToInt32(p.Element("dishId").Value) == id
+            XElement TesterElement;
+            TesterElement = (from p in TesterRoot.Elements()
+                           where Convert.ToInt32(p.Element("TesterID").Value) == id
                            select p).FirstOrDefault();
-            if (dishElement == null)
+            if (TesterElement == null)
                 return false;
             return true;
         }
 
-        public void addDish(Dish dish)//הוספת מנה
+        public void AddTester(Tester T)
         {
-            if (findDish(dish.dishId))
+            if (FindTester(T.ID))
                 throw new Exception("The dish is already exsist in the system");
-            XElement dishId = new XElement("dishId", dish.dishId);
-            XElement dishName = new XElement("dishName", dish.dishName);
-            XElement dishPrice = new XElement("dishPrice", dish.dishPrice);
-            XElement dishSize = new XElement("dishSize", dish.dishSize);
-            XElement hechsher = new XElement("hechsher", dish.hechsher);
-            dishRoot.Add(new XElement("dish", dishId, dishName, dishPrice, dishSize, hechsher));
-            dishRoot.Save(dishPath);
+            XElement TesterID = new XElement("TesterID", T.ID);
+            XElement FamilyName = new XElement("FamilyName", T.FamilyName);
+            XElement FirstName = new XElement("FirstName", T.FirstName);
+            XElement Birthday = new XElement("Birthday", T.Birthday);
+            XElement Gender = new XElement("Gender", T.Gender);
+            XElement PhoneNum = new XElement("PhoneNum", T.PhoneNum);
+            XElement Address = new XElement("Address", T.Address);
+            XElement Experience = new XElement("Experience", T.Experience);
+            XElement MaxTestAmt = new XElement("MaxTestAmt", T.MaxTestAmt);
+            XElement Model = new XElement("Model", T.Model);
+            XElement Hours = new XElement("Hours", T.Hours);
+            XElement MaxDist = new XElement("MaxDist", T.Hours);
+            TesterRoot.Add(new XElement("Tester", TesterID, FamilyName, FirstName, Birthday, Gender, PhoneNum, Address, Experience, MaxTestAmt, Model, Hours, MaxDist));
+            TesterRoot.Save(TesterPath);
         }
-        public void deleteDish(int dishId) //מחיקת מנה
+        public void DeleteTester(int TesterID)  
         {
-            XElement dishElement;
-            dishElement = (from p in dishRoot.Elements()
-                           where Convert.ToInt32(p.Element("dishId").Value) == dishId
+            XElement TesterElement;
+            TesterElement = (from p in TesterRoot.Elements()
+                           where Convert.ToInt32(p.Element("TesterID").Value) == TesterID
                            select p).FirstOrDefault();
-            if (dishElement == null)
+            if (TesterElement == null)
                 throw new Exception("The dish dos'nt exsist in the system");
-            dishElement.Remove();
-            dishRoot.Save(dishPath);
+            TesterElement.Remove();
+            TesterRoot.Save(TesterPath);
 
         }
-        public IEnumerable<Dish> getAllDish(Func<Dish, bool> predicat = null)
+        public IEnumerable<Tester> GetAllTesters(Func<Tester, bool> predicat = null)
         {
-            IEnumerable<Dish> dishes;
+            IEnumerable<Tester> Testers;
             try
             {
 
-                dishes = from p in dishRoot.Elements()
-                         select new Dish()
-                         {
-                             dishId = Convert.ToInt32(p.Element("dishId").Value),
-                             dishName = (p.Element("dishName").Value).ToString(),
-                             dishPrice = float.Parse(p.Element("dishPrice").Value),
-                             dishSize = (BE.Size)Enum.Parse(typeof(BE.Size), p.Element("dishSize").Value),
-                             hechsher = (BE.kosherLevel)Enum.Parse(typeof(BE.kosherLevel), p.Element("hechsher").Value)
+                Testers = from p in TesterRoot.Elements()
+                          select new Tester()
+                          {
+                              ID = Convert.ToInt32(p.Element("TesterID").Value),
+                              FamilyName = (p.Element("FamilyName").Value).ToString(),
+                              FirstName = (p.Element("FirstName").Value).ToString(),
+                              Birthday = (p.Element("Birthday").Value).ToString(),
+                              Gender = (p.Element("Gender").Value).ToString(),
+                              PhoneNum = Convert.ToInt32(p.Element("PhoneNum").Value),
+                              Address = (p.Element("Address").Value).ToString(),
+                              Experience = Convert.ToInt32(p.Element("Address").Value),
+                              MaxTestAmt = Convert.ToInt32(p.Element("MaxTestAmt").Value),
+                              Model = (p.Element("Model").Value).ToString(),
+                              Hours = (p.Element("Hours").Value).ToString(),
+                              MaxDist = Convert.ToInt32(p.Element("MaxDist").Value),
                          };
                 if (predicat != null)
                 {
-                    dishes = dishes.Where(predicat);
+                    Testers = Testers.Where(predicat);
 
                 }
             }
             catch
             {
-                dishes = null;
+                Testers = null;
             }
-            return dishes;
+            return Testers;
         }
 
 
-        public void updateDish(Dish d)
+        public void UpdateTester(Tester T)
         {
-            XElement dishElement = (from p in dishRoot.Elements()
-                                    where Convert.ToInt32(p.Element("dishId").Value) == d.dishId
+            XElement TesterElement = (from p in TesterRoot.Elements()
+                                    where Convert.ToInt32(p.Element("TesterID").Value) == T.ID
                                     select p).FirstOrDefault();
-            dishElement.Element("dishName").Value = d.dishName;
-            dishElement.Element("dishPrice").Value = (d.dishPrice).ToString();
-            dishElement.Element("dishSize").Value = (d.dishSize).ToString();
-            dishElement.Element("hechsher").Value = (d.hechsher).ToString();
+            TesterElement.Element("FamilyName").Value = T.FamilyName.ToString();
+            TesterElement.Element("FirstName").Value = T.FirstName.ToString();
+            TesterElement.Element("Birthday").Value = T.Birthday.ToString();
+            TesterElement.Element("Gender").Value = T.Gender.ToString();
+            TesterElement.Element("PhoneNum").Value = T.PhoneNum;
+            TesterElement.Element("Address").Value = T.Address.ToString();
             dishRoot.Save(dishPath);
         }
         public string convertDishIdToDishName(int dishId)
@@ -381,23 +385,15 @@ namespace DAL
         }
         #endregion
 
-        #region Lists
-
-        public List<Tester> GetListDishes()
+        public List<Tester> GetListTesters()
         {
             throw new NotImplementedException();
         }
 
-        public List<Trainee> GetListBranches()
+        public List<Trainee> GetListTrainees()
         {
             throw new NotImplementedException();
         }
-        public List<Test> GetListTests()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
 
 
     }
